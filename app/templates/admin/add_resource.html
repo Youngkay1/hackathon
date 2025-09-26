@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Add Resource - Emergency Response System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-plus"></i> Add New Resource</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Resource Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="resource_type" class="form-label">Resource Type *</label>
+                                    <select class="form-select" id="resource_type" name="resource_type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="shelter">Shelter</option>
+                                        <option value="food">Food</option>
+                                        <option value="transport">Transport</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="location" class="form-label">Location *</label>
+                                    <input type="text" class="form-control" id="location" name="location" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="latitude" class="form-label">Latitude</label>
+                                    <input type="number" step="any" class="form-control" id="latitude" name="latitude">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="longitude" class="form-label">Longitude</label>
+                                    <input type="number" step="any" class="form-control" id="longitude" name="longitude">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="total_capacity" class="form-label">Total Capacity</label>
+                                    <input type="number" class="form-control" id="total_capacity" name="total_capacity" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="available_capacity" class="form-label">Available Capacity</label>
+                                    <input type="number" class="form-control" id="available_capacity" name="available_capacity" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="contact_person" class="form-label">Contact Person</label>
+                                    <input type="text" class="form-control" id="contact_person" name="contact_person">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="contact_phone" class="form-label">Contact Phone</label>
+                                    <input type="tel" class="form-control" id="contact_phone" name="contact_phone">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="organization" class="form-label">Organization</label>
+                            <input type="text" class="form-control" id="organization" name="organization">
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.resources') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Resources
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Resource
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-populate available capacity when total capacity changes
+document.getElementById('total_capacity').addEventListener('input', function() {
+    const totalCapacity = this.value;
+    const availableCapacityField = document.getElementById('available_capacity');
+    if (availableCapacityField.value === '' || availableCapacityField.value === '0') {
+        availableCapacityField.value = totalCapacity;
+    }
+});
+</script>
+{% endblock %}

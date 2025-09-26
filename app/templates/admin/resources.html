@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - Emergency Response System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-boxes"></i> Resource Management</h2>
+        <a href="{{ url_for('admin.add_resource') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Resource
+        </a>
+    </div>
+
+    <!-- Filter Options -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="type" class="form-label">Resource Type</label>
+                    <select name="type" id="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="shelter" {{ 'selected' if request.args.get('type') == 'shelter' }}>Shelter</option>
+                        <option value="food" {{ 'selected' if request.args.get('type') == 'food' }}>Food</option>
+                        <option value="transport" {{ 'selected' if request.args.get('type') == 'transport' }}>Transport</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <a href="{{ url_for('admin.resources') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resources Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if resources.items %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Capacity</th>
+                            <th>Available</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resource in resources.items %}
+                        <tr>
+                            <td>
+                                <strong>{{ resource.name }}</strong>
+                                {% if resource.organization %}
+                                <br><small class="text-muted">{{ resource.organization }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if resource.resource_type.value == 'shelter' %}
+                                    <span class="badge bg-primary">{{ resource.resource_type.value }}</span>
+                                {% elif resource.resource_type.value == 'food' %}
+                                    <span class="badge bg-success">{{ resource.resource_type.value }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ resource.resource_type.value }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ resource.location }}</td>
+                            <td>{{ resource.total_capacity }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-success' if resource.available_capacity > 0 else 'bg-danger' }}">
+                                    {{ resource.available_capacity }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if resource.contact_person %}
+                                    {{ resource.contact_person }}<br>
+                                {% endif %}
+                                {% if resource.contact_phone %}
+                                    <small>{{ resource.contact_phone }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if resource.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_resource', resource_id=resource.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if resources.pages > 1 %}
+            <nav aria-label="Resource pagination">
+                <ul class="pagination justify-content-center">
+                    {% if resources.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.resources', page=resources.prev_num) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in resources.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != resources.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.resources', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if resources.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.resources', page=resources.next_num) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No resources found</h5>
+                <p class="text-muted">Start by adding your first emergency resource.</p>
+                <a href="{{ url_for('admin.add_resource') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Resource
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
