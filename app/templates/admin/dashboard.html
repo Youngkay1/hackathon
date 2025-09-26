@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Emergency Response System{% endblock %}
+
+{% block content %}
+<div class="emergency-header">
+    <div class="container">
+        <h1><i class="fas fa-tachometer-alt"></i> Emergency Response Dashboard</h1>
+        <p class="lead">Real-time monitoring of emergency resources and requests</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3>{{ total_resources }}</h3>
+                <p><i class="fas fa-boxes"></i> Active Resources</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3>{{ total_requests }}</h3>
+                <p><i class="fas fa-exclamation-triangle"></i> Total Requests</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3>{{ pending_requests }}</h3>
+                <p><i class="fas fa-clock"></i> Pending Requests</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3>{{ (shelter_stats.utilization_rate + food_stats.utilization_rate + transport_stats.utilization_rate) / 3 | round(1) }}%</h3>
+                <p><i class="fas fa-chart-line"></i> Avg Utilization</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Statistics -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-home"></i> Shelter Resources</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Resources:</strong> {{ shelter_stats.total_resources }}</p>
+                    <p><strong>Total Capacity:</strong> {{ shelter_stats.total_capacity }}</p>
+                    <p><strong>Available:</strong> {{ shelter_stats.available_capacity }}</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" style="width: {{ shelter_stats.utilization_rate }}%"></div>
+                    </div>
+                    <small>{{ shelter_stats.utilization_rate | round(1) }}% utilized</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-utensils"></i> Food Resources</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Resources:</strong> {{ food_stats.total_resources }}</p>
+                    <p><strong>Total Capacity:</strong> {{ food_stats.total_capacity }}</p>
+                    <p><strong>Available:</strong> {{ food_stats.available_capacity }}</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: {{ food_stats.utilization_rate }}%"></div>
+                    </div>
+                    <small>{{ food_stats.utilization_rate | round(1) }}% utilized</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="fas fa-car"></i> Transport Resources</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Resources:</strong> {{ transport_stats.total_resources }}</p>
+                    <p><strong>Total Capacity:</strong> {{ transport_stats.total_capacity }}</p>
+                    <p><strong>Available:</strong> {{ transport_stats.available_capacity }}</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" style="width: {{ transport_stats.utilization_rate }}%"></div>
+                    </div>
+                    <small>{{ transport_stats.utilization_rate | round(1) }}% utilized</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Requests -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Recent Emergency Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Phone</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in recent_requests %}
+                                <tr>
+                                    <td>{{ request.id }}</td>
+                                    <td>{{ request.user.phone_number }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ request.resource_type.value }}</span>
+                                    </td>
+                                    <td>{{ request.location or 'N/A' }}</td>
+                                    <td>
+                                        {% if request.status.value == 'pending' %}
+                                            <span class="badge bg-warning">{{ request.status.value }}</span>
+                                        {% elif request.status.value == 'matched' %}
+                                            <span class="badge bg-info">{{ request.status.value }}</span>
+                                        {% elif request.status.value == 'confirmed' %}
+                                            <span class="badge bg-primary">{{ request.status.value }}</span>
+                                        {% elif request.status.value == 'completed' %}
+                                            <span class="badge bg-success">{{ request.status.value }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ request.status.value }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent requests found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('admin.add_resource') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus"></i> Add Resource
+                    </a>
+                    <a href="{{ url_for('admin.resources') }}" class="btn btn-secondary me-2">
+                        <i class="fas fa-boxes"></i> Manage Resources
+                    </a>
+                    <a href="{{ url_for('admin.requests') }}" class="btn btn-warning me-2">
+                        <i class="fas fa-exclamation-triangle"></i> View Requests
+                    </a>
+                    <button class="btn btn-info" onclick="refreshData()">
+                        <i class="fas fa-sync"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshData() {
+    location.reload();
+}
+
+// Auto-refresh every 30 seconds
+setInterval(refreshData, 30000);
+</script>
+{% endblock %}
